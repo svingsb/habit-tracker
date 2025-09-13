@@ -1,8 +1,7 @@
 import streamlit as st
 import json
 from datetime import date
-import random
-from transformers import pipeline
+from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
 
 # 🔧 Seitenlayout konfigurieren
 st.set_page_config(page_title="🧘 Habit Tracker", layout="centered")
@@ -15,7 +14,7 @@ except:
     habits = {}
 
 # 🧠 Begrüßung
-st.title("🌱 Minimalistischer Habit Tracker")
+st.title("🌱 Minimalistischer Habit Tracker mit KI-Coach")
 st.markdown("Tracke deine täglichen Gewohnheiten – bleib dran, wachse Schritt für Schritt.")
 
 # ➕ Neue Gewohnheit hinzufügen
@@ -46,20 +45,27 @@ for habit, dates in habits.items():
     elif streak == 0:
         st.warning(f"⏳ Zeit, mit '{habit}' zu starten!")
 
-# 🤖 KI-Coach mit GPT2
+# 🤖 KI-Coach mit distilgpt2
 st.markdown("## 🧠 KI-Coach Motivation")
 
-# GPT2-Modell laden
-coach = pipeline("text-generation", model="gpt2", device=-1)
+# Modellname
+model_name = "distilgpt2"
+
+# Tokenizer & Modell laden
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name)
+
+# Pipeline mit CPU erzwingen
+coach = pipeline("text-generation", model=model, tokenizer=tokenizer, device=-1)
 
 # Eingabetext für Motivation
-input_text = "Gib mir Motivation für jemanden, der seine täglichen Gewohnheiten durchhält:"
-motivation = coach(input_text, max_length=50, num_return_sequences=1)[0]['generated_text']
+input_text = "Gib mir Motivation für jemanden, der seine Gewohnheiten durchhält:"
+output = coach(input_text, max_length=50, num_return_sequences=1)
 
-# Anzeige
+# Ausgabe anzeigen
+motivation = output[0]['generated_text']
 st.success("🧠 KI-Coach sagt: " + motivation)
 
 # 💾 Daten speichern
 with open("habits.json", "w") as f:
     json.dump(habits, f)
-
