@@ -50,7 +50,7 @@ for habit, dates in habits.items():
 st.markdown("## 🧠 KI-Coach Motivation")
 
 # GPT2-Modell laden
-coach = pipeline("text-generation", model="gpt2")
+coach = pipeline("text-generation", model="gpt2", device=-1)
 
 # Eingabetext für Motivation
 input_text = "Gib mir Motivation für jemanden, der seine täglichen Gewohnheiten durchhält:"
@@ -62,3 +62,4 @@ st.success("🧠 KI-Coach sagt: " + motivation)
 # 💾 Daten speichern
 with open("habits.json", "w") as f:
     json.dump(habits, f)
+
